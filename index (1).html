@@ -1,93 +1,119 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
 <head>
-    <title>L22 - Controller-based interactions</title>
-    <script src="https://aframe.io/releases/0.7.1/aframe.min.js"></script>
-    <script src="https://unpkg.com/aframe-event-set-component@^4.0.0/dist/aframe-event-set-component.min.js"></script>
-    <script src="https://unpkg.com/super-hands@2.1.0/dist/super-hands.min.js"></script>
+  <title>L22 - Controller-based interactions</title>
+  <script src="https://aframe.io/releases/0.7.1/aframe.min.js"></script>
+  <script src="https://unpkg.com/aframe-event-set-component@^4.0.0/dist/aframe-event-set-component.min.js"></script>
+  <script src="https://unpkg.com/super-hands@2.1.0/dist/super-hands.min.js"></script>
+  <script src="https://unpkg.com/aframe-extras@6.1.1/dist/aframe-extras.controls.min.js"></script>
 </head>
 
 <body>
-    <a-scene webxr="optionalFeatures: hand-tracking" physics="gravity: -9.8">
-        <!-- Cámara -->
-        <a-assets>
-    <!-- Mixin para controles de mirada progresiva (gaze) -->
-            <a-mixin 
-                id="progressivecontrolsgazedefault"
-                position="@ @ -0.5" 
-                raycaster="objects: .UIbutton"
-                cursor="fuse: true; fuseTimeout: 1000"
-                geometry="primitive: sphere; radius: 0.0025"
-                material="color: #999999; shader: flat"
-                super-hands="
-                    colliderEvent: raycaster-intersection;
-                    colliderEventProperty: els;
-                    colliderEndEvent: raycaster-intersection-cleared;
-                    colliderEndEventProperty: el">
-            </a-mixin>
+  <a-scene webxr="optionalFeatures: hand-tracking" physics="gravity: -9.8">
 
-            <!-- Mixin para controles de puntero progresivo -->
-            <a-mixin 
-                id="progressivecontrolspointdefault"
-                line="color: #FF00FF" 
-                raycaster="showLine: true; objects: .UIbutton"
-                super-hands="
-                    colliderEvent: raycaster-intersection;
-                    colliderEventProperty: els;
-                    colliderEndEvent: raycaster-intersection-cleared;
-                    colliderEndEventProperty: el">
-            </a-mixin>
-        </a-assets>
-        <a-entity progressive-controls></a-entity>
+    <!-- Assets -->
+    <a-assets>
+      <!-- Mixin para controles de mirada progresiva (gaze) -->
+      <a-mixin 
+        id="progressivecontrolsgazedefault"
+        position="@ @ -0.5" 
+        raycaster="objects: .UIbutton"
+        cursor="fuse: true; fuseTimeout: 1000"
+        geometry="primitive: sphere; radius: 0.0025"
+        material="color: #999999; shader: flat"
+        super-hands="
+          colliderEvent: raycaster-intersection;
+          colliderEventProperty: els;
+          colliderEndEvent: raycaster-intersection-cleared;
+          colliderEndEventProperty: el">
+      </a-mixin>
 
-<!-- Main Screen -->
-<a-box 
-    id="screen" 
-    color="#212121" 
-    position="0 2.75 -9" 
-    scale="8 4 0.1" 
-    hoverable 
-    event-set_rescol="_event: click; color: #212121">
-</a-box>
+      <!-- Mixin para controles de puntero progresivo -->
+      <a-mixin 
+        id="progressivecontrolspointdefault"
+        line="color: #FF00FF" 
+        raycaster="showLine: true; objects: .UIbutton"
+        super-hands="
+          colliderEvent: raycaster-intersection;
+          colliderEventProperty: els;
+          colliderEndEvent: raycaster-intersection-cleared;
+          colliderEndEventProperty: el">
+      </a-mixin>
+    </a-assets>
 
-<!-- Left Button -->
-<a-box 
-    color="#212121" 
-    position="-2.25 0 -9" 
-    scale="2 1 0.1" 
-    hoverable 
-    class="UIbutton"
-    event-set_enter="_event: hover-start; color: #AA0000"
-    event-set_leave="_event: hover-end; color: #212121"
-    event-set_tarcol="_event: click; _target: #screen; color: #AA0000">
-</a-box>
+    <!-- Cámara con cursor -->
+    <a-entity id="cameraRig" position="0 1.6 0">
+      <a-camera>
+        <a-cursor 
+          fuse="true" 
+          fuse-timeout="1000"
+          raycaster="objects: .UIbutton"
+          geometry="primitive: ring; radiusInner: 0.01; radiusOuter: 0.02"
+          material="color: white; shader: flat">
+        </a-cursor>
+      </a-camera>
+    </a-entity>
 
-<!-- Center Button -->
-<a-box 
-    color="#212121" 
-    position="0 0 -9" 
-    scale="2 1 0.1" 
-    hoverable 
-    class="UIbutton"
-    event-set_enter="_event: hover-start; color: #FFAA00"
-    event-set_leave="_event: hover-end; color: #212121"
-    event-set_tarcol="_event: click; _target: #screen; color: #FFAA00">
-</a-box>
+    <!-- Controles progresivos -->
+    <a-entity progressive-controls></a-entity>
 
-<!-- Right Button -->
-<a-box 
-    color="#212121" 
-    position="2.25 0 -9" 
-    scale="2 1 0.1" 
-    hoverable 
-    class="UIbutton"
-    event-set_enter="_event: hover-start; color: #00AAFF"
-    event-set_leave="_event: hover-end; color: #212121"
-    event-set_tarcol="_event: click; _target: #screen; color: #00AAFF">
-</a-box>
+    <!-- Pantalla principal -->
+    <a-box 
+      id="screen" 
+      color="#212121" 
+      position="0 2.75 -9" 
+      scale="8 4 0.1" 
+      hoverable 
+      event-set_rescol="_event: click; color: #212121">
+    </a-box>
 
-<a-sky></a-sky>
+    <!-- Texto de retroalimentación -->
+    <a-text 
+      id="label" 
+      value="Selecciona un color" 
+      position="0 1.5 -9" 
+      align="center" 
+      color="#FFFFFF">
+    </a-text>
 
+    <!-- Botón izquierdo -->
+    <a-box 
+      color="#212121" 
+      position="-2.25 0 -9" 
+      scale="2 1 0.1" 
+      hoverable 
+      class="UIbutton"
+      event-set_enter="_event: hover-start; color: #AA0000"
+      event-set_leave="_event: hover-end; color: #212121"
+      event-set_tarcol="_event: click; _target: #screen; color: #AA0000">
+    </a-box>
+
+    <!-- Botón central -->
+    <a-box 
+      color="#212121" 
+      position="0 0 -9" 
+      scale="2 1 0.1" 
+      hoverable 
+      class="UIbutton"
+      event-set_enter="_event: hover-start; color: #FFAA00"
+      event-set_leave="_event: hover-end; color: #212121"
+      event-set_tarcol="_event: click; _target: #screen; color: #FFAA00">
+    </a-box>
+
+    <!-- Botón derecho -->
+    <a-box 
+      color="#212121" 
+      position="2.25 0 -9" 
+      scale="2 1 0.1" 
+      hoverable 
+      class="UIbutton"
+      event-set_enter="_event: hover-start; color: #00AAFF"
+      event-set_leave="_event: hover-end; color: #212121"
+      event-set_tarcol="_event: click; _target: #screen; color: #00AAFF">
+    </a-box>
+
+    <!-- Cielo claro -->
+    <a-sky color="#ECECEC"></a-sky>
+  </a-scene>
 </body>
-
 </html>
