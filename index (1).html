@@ -1,79 +1,82 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8">
-    <title>L22 - Controller-based interactions</title>
-    <meta name="description" content="Meta Quest 3 Ready Scene">
-    
-    <!-- ✅ A-Frame actualizado con soporte WebXR -->
+    <title>Meta Quest 3 - VR Buttons</title>
+    <meta charset="utf-8" />
+    <meta name="description" content="VR Controls for Meta Quest 3" />
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-    <script src="https://unpkg.com/aframe-event-set-component@^4.0.0/dist/aframe-event-set-component.min.js"></script>
     <script src="https://unpkg.com/super-hands@3.0.2/dist/super-hands.min.js"></script>
-    <script src="https://unpkg.com/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/aframe-environment-component@1.3.1/dist/aframe-environment-component.min.js"></script>
+    <script src="https://unpkg.com/aframe-event-set-component@5.0.0/dist/aframe-event-set-component.min.js"></script>
   </head>
-  <body>
-    <a-scene webxr="optionalFeatures: hand-tracking" environment="preset: default">
-      
-      <!-- Cámara con cursor de mirada para modo sin controladores -->
-      <a-entity id="cameraRig">
-        <a-entity camera look-controls wasd-controls position="0 1.6 0">
-          <a-entity 
-            cursor="fuse: true; fuseTimeout: 1000"
-            position="0 0 -1"
-            geometry="primitive: ring; radiusInner: 0.01; radiusOuter: 0.02"
-            material="color: cyan; shader: flat">
-          </a-entity>
-        </a-entity>
-      </a-entity>
 
-      <!-- Controladores y manos -->
-      <a-entity id="leftHand" hand-controls="hand: left" super-hands></a-entity>
-      <a-entity id="rightHand" hand-controls="hand: right" super-hands></a-entity>
+  <body>
+    <a-scene webxr="optionalFeatures: local-floor, bounded-floor, hand-tracking">
+      <!-- Cámara -->
+      <a-entity camera look-controls wasd-controls position="0 1.6 0"></a-entity>
+
+      <!-- Controlador izquierdo -->
+      <a-entity
+        id="leftHand"
+        hand-controls="hand: left"
+        super-hands
+        raycaster="objects: .UIbutton"
+        line="color: #00FF00; opacity: 0.75"
+      ></a-entity>
+
+      <!-- Controlador derecho -->
+      <a-entity
+        id="rightHand"
+        hand-controls="hand: right"
+        super-hands
+        raycaster="objects: .UIbutton"
+        line="color: #FF0000; opacity: 0.75"
+      ></a-entity>
 
       <!-- Pantalla principal -->
-      <a-box 
-        id="screen" 
-        color="#212121" 
-        position="0 2.75 -4" 
-        scale="8 4 0.1">
-      </a-box>
+      <a-box
+        id="screen"
+        color="#212121"
+        position="0 2.75 -9"
+        scale="8 4 0.1"
+        hoverable
+        event-set_rescol="_event: click; color: #212121"
+      ></a-box>
 
       <!-- Botón Izquierdo -->
-      <a-box 
-        class="UIbutton"
-        color="#212121" 
-        position="-2.25 1.25 -4" 
+      <a-box
+        color="#212121"
+        position="-2.25 0 -8.9"
         scale="2 1 0.1"
         hoverable
-        event-set__hoverstart="_event: hover-start; color: #AA0000"
-        event-set__hoverend="_event: hover-end; color: #212121"
-        event-set__click="_event: click; _target: #screen; color: #AA0000">
-      </a-box>
+        class="UIbutton"
+        event-set__enter="_event: hover-start; color: #AA0000"
+        event-set__leave="_event: hover-end; color: #212121"
+        event-set__click="_event: click; _target: #screen; color: #AA0000"
+      ></a-box>
 
       <!-- Botón Central -->
-      <a-box 
-        class="UIbutton"
-        color="#212121" 
-        position="0 1.25 -4" 
+      <a-box
+        color="#212121"
+        position="0 0 -8.9"
         scale="2 1 0.1"
         hoverable
-        event-set__hoverstart="_event: hover-start; color: #FFAA00"
-        event-set__hoverend="_event: hover-end; color: #212121"
-        event-set__click="_event: click; _target: #screen; color: #FFAA00">
-      </a-box>
+        class="UIbutton"
+        event-set__enter="_event: hover-start; color: #FFAA00"
+        event-set__leave="_event: hover-end; color: #212121"
+        event-set__click="_event: click; _target: #screen; color: #FFAA00"
+      ></a-box>
 
       <!-- Botón Derecho -->
-      <a-box 
-        class="UIbutton"
-        color="#212121" 
-        position="2.25 1.25 -4" 
+      <a-box
+        color="#212121"
+        position="2.25 0 -8.9"
         scale="2 1 0.1"
         hoverable
-        event-set__hoverstart="_event: hover-start; color: #00AAFF"
-        event-set__hoverend="_event: hover-end; color: #212121"
-        event-set__click="_event: click; _target: #screen; color: #00AAFF">
-      </a-box>
+        class="UIbutton"
+        event-set__enter="_event: hover-start; color: #00AAFF"
+        event-set__leave="_event: hover-end; color: #212121"
+        event-set__click="_event: click; _target: #screen; color: #00AAFF"
+      ></a-box>
 
       <!-- Cielo -->
       <a-sky color="#ECECEC"></a-sky>
