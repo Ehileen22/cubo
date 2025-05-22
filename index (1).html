@@ -1,80 +1,115 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Interacción con controles Meta Quest</title>
-    <script src="https://aframe.io/releases/1.7.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/aframe-physics-system@5.0.0/dist/aframe-physics-system.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/super-hands"></script>
+    <title>L22 - Controller-based interactions</title>
+    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script> <!-- Versión más reciente -->
+    <script src="https://unpkg.com/aframe-event-set-component@4.2.1/dist/aframe-event-set-component.min.js"></script>
+    <script src="https://unpkg.com/super-hands@3.1.1/dist/super-hands.min.js"></script> <!-- Versión actualizada -->
+    <script src="https://unpkg.com/aframe-progressive-controls@1.1.3/dist/aframe-progressive-controls.min.js"></script> <!-- Componente faltante -->
 </head>
 
 <body>
-    <a-scene webxr="optionalFeatures: hand-tracking" physics="gravity: -9.8">
-        <!-- Cámara -->
-        <a-camera position="0 1.6 0"></a-camera>
+    <a-scene 
+        vr-mode-ui="enabled: true"
+        xr-mode-ui="enabled: true"
+        webxr="
+            optionalFeatures: hand-tracking, controllers;
+            requiredFeatures: local-floor"
+        physics="gravity: -9.8; debug: false"
+        cursor="rayOrigin: mouse">
+        
+        <a-assets>
+            <a-mixin 
+                id="progressivecontrolsgazedefault"
+                position="0 0 -0.5" 
+                raycaster="objects: .UIbutton"
+                cursor="fuse: true; fuseTimeout: 1000"
+                geometry="primitive: sphere; radius: 0.0025"
+                material="color: #999999; shader: flat"
+                super-hands="
+                    colliderEvent: raycaster-intersection;
+                    colliderEventProperty: els;
+                    colliderEndEvent: raycaster-intersection-cleared;
+                    colliderEndEventProperty: el">
+            </a-mixin>
 
-        <!-- Controladores de Meta Quest -->
-        <a-entity meta-touch-controls="hand: left" super-hands="maxGrabDistance: 2"
-            collision-filter="group: hand; collidesWith: interactivo"></a-entity>
-        <a-entity meta-touch-controls="hand: right" super-hands="maxGrabDistance: 2"
-            collision-filter="group: hand; collidesWith: interactivo"></a-entity>
+            <a-mixin 
+                id="progressivecontrolspointdefault"
+                line="color: #FF00FF" 
+                raycaster="showLine: true; objects: .UIbutton"
+                super-hands="
+                    colliderEvent: raycaster-intersection;
+                    colliderEventProperty: els;
+                    colliderEndEvent: raycaster-intersection-cleared;
+                    colliderEndEventProperty: el">
+            </a-mixin>
+        </a-assets>
 
-        <!-- Cubo interactivo -->
-        <a-box id="cubo" position="0 1.5 -0.5" color="red" scale="0.5 0.5 0.5" class="interactivo"
-            geometry="primitive: box" dynamic-body grabbable hoverable draggable>
+        <!-- Cámara con cursor para modo escritorio -->
+        <a-camera position="0 1.6 0">
+            <a-cursor></a-cursor>
+        </a-camera>
+
+        <!-- Controles progresivos -->
+        <a-entity mixin="progressivecontrolsgazedefault" progressive-controls></a-entity>
+
+        <!-- Interfaz de usuario -->
+        <a-box 
+            id="screen" 
+            color="#212121" 
+            position="0 1.6 -1.5"  <!-- Posición más cercana -->
+            scale="2 1.5 0.1"       <!-- Tamaño más adecuado -->
+            hoverable 
+            event-set__rescol="_event: click; color: #212121">
+        </a-box>
+
+        <!-- Botones (posición relativa a la pantalla) -->
+        <a-box 
+            color="#212121" 
+            position="-0.8 1.6 -1.2" 
+            scale="0.5 0.25 0.1" 
+            hoverable 
+            class="UIbutton"
+            event-set__enter="_event: hover-start; color: #AA0000"
+            event-set__leave="_event: hover-end; color: #212121"
+            event-set__tarcol="_event: click; _target: #screen; color: #AA0000">
+        </a-box>
+
+        <a-box 
+            color="#212121" 
+            position="0 1.6 -1.2" 
+            scale="0.5 0.25 0.1" 
+            hoverable 
+            class="UIbutton"
+            event-set__enter="_event: hover-start; color: #FFAA00"
+            event-set__leave="_event: hover-end; color: #212121"
+            event-set__tarcol="_event: click; _target: #screen; color: #FFAA00">
+        </a-box>
+
+        <a-box 
+            color="#212121" 
+            position="0.8 1.6 -1.2" 
+            scale="0.5 0.25 0.1" 
+            hoverable 
+            class="UIbutton"
+            event-set__enter="_event: hover-start; color: #00AAFF"
+            event-set__leave="_event: hover-end; color: #212121"
+            event-set__tarcol="_event: click; _target: #screen; color: #00AAFF">
         </a-box>
 
         <!-- Suelo -->
-        <a-plane rotation="-90 0 0" width="10" height="10" color="#ccc" static-body></a-plane>
+        <a-plane 
+            position="0 0 -1.5" 
+            rotation="-90 0 0" 
+            width="4" 
+            height="4" 
+            color="#DDDDDD"
+            static-body>
+        </a-plane>
+
+        <!-- Luz -->
+        <a-light type="ambient" color="#FFFFFF" intensity="0.5"></a-light>
+        <a-light type="directional" color="#FFFFFF" intensity="0.5" position="-1 2 1"></a-light>
     </a-scene>
-
-    <script>
-        AFRAME.registerComponent('cubito', {
-            init: function () {
-                const cubo = document.querySelector('#cubo');
-
-                // Detectar cuando el cubo es tocado
-                cubo.addEventListener('grab-start', () => {
-                    console.log('cubo tocado');
-                    cubo.setAttribute('color', 'green');  // Cambiar el color a verde
-                });
-
-                // Detectar cuando el cubo deja de ser tocado
-                cubo.addEventListener('grab-end', () => {
-                    console.log('cubo dejado');
-                    cubo.setAttribute('color', 'red');  // Volver a color rojo
-                });
-            }
-        });
-    </script>
 </body>
-
 </html>
-
-<!--script>
-        AFRAME.registerComponent('cubito', {
-            init: function () {
-                const cubo = document.querySelector('#cubo');
-
-                cubo.addEventListener('raycaster-intersected', () => {
-                    console.log('mouseenter');
-                    cubo.setAttribute('color', 'green');
-                });
-
-                cubo.addEventListener('raycaster-intersected-cleared', () => {
-                    console.log('mouseleave');
-                    cubo.setAttribute('color', 'red');
-                });
-
-                cubo.addEventListener('grab-start', () => {
-                    cubo.setAttribute('color', 'blue');
-                });
-
-                cubo.addEventListener('grab-end', () => {
-                    cubo.setAttribute('color', 'red');
-                });
-            }
-        });
-    </script-->
